@@ -438,7 +438,7 @@ mod test_get_id_closest_window_with_cwd {
 fn kitty_move_focused_back_by(dx: usize) {
     // dbg!(format!("moving back by {dx}"));
     let _ = Command::new("kitty")
-        .args(["@", "kitten", "mykitten123.py", &format!("{dx}")])
+        .args(["@", "kitten", "move_tab_backward_n.py", &format!("{dx}")])
         .output()
         .expect("failed to focus tab");
 }
