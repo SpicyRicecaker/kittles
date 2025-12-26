@@ -493,6 +493,18 @@ struct Flags {
 }
 
 fn main() {
+    {
+        // task 1: ensure file exists/verify integrity
+        // task 2: return file path
+        // 
+        // define data dir
+        // define move tab backward n times kitten file
+        // ensure file exists
+        // if not, insert str from program
+        // if yes, read file, ensure that it matches hash
+        //   if no hash match, create file and write
+        // return file path
+    }
     let kitty_ls = kitty_ls();
     let package = kitty_get_windows_package(&kitty_ls);
     // dbg!(&package.windows);
