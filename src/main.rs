@@ -10,12 +10,13 @@ struct Package {
     i_current_window_cwd: usize,
     windows_cwd: Vec<WindowCWD>,
     window_current_cwd: String,
-    id_window_current: usize
+    id_window_current: usize,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct Screen {
     id: usize,
+    is_active: bool,
     tabs: Vec<Tab>,
 }
 
@@ -51,7 +52,12 @@ fn kitty_get_windows_package(kitty_ls: &str) -> Package {
     let screens: Vec<Screen> = serde_json::from_str(kitty_ls).expect("failed to parse");
 
     // assume only 1 screen
-    let tabs = screens[0].tabs.clone();
+    let tabs = screens
+        .into_iter()
+        .find(|s| s.is_active)
+        .unwrap()
+        .tabs
+        .clone();
     // dbg!(&tabs);
     let (i_current_tab, window_current) = tabs
         .iter()
@@ -122,7 +128,7 @@ fn kitty_get_windows_package(kitty_ls: &str) -> Package {
         tabs,
         windows_cwd,
         window_current_cwd,
-        id_window_current
+        id_window_current,
     }
 }
 
@@ -320,16 +326,7 @@ mod test_get_id_closest_window_with_cwd {
     #[test]
     fn test1() {
         let i_current_window = 0;
-        let windows = vec![
-            WindowCWD {
-                id: 0,
-                i_tab: 0,
-            },
-            WindowCWD {
-                id: 1,
-                i_tab: 1,
-            },
-        ];
+        let windows = vec![WindowCWD { id: 0, i_tab: 0 }, WindowCWD { id: 1, i_tab: 1 }];
         assert_eq!(
             kitty_get_id_closest_window_with_cwd(i_current_window, &windows).unwrap(),
             1
@@ -339,10 +336,7 @@ mod test_get_id_closest_window_with_cwd {
     #[test]
     fn test2() {
         let i_current_window = 0;
-        let windows = vec![WindowCWD {
-            id: 0,
-            i_tab: 0
-        }];
+        let windows = vec![WindowCWD { id: 0, i_tab: 0 }];
         assert_eq!(
             kitty_get_id_closest_window_with_cwd(i_current_window, &windows),
             None
@@ -353,22 +347,10 @@ mod test_get_id_closest_window_with_cwd {
     fn test3() {
         let i_current_window = 1;
         let windows = vec![
-            WindowCWD {
-                id: 0,
-                i_tab: 0
-            },
-            WindowCWD {
-                id: 1,
-                i_tab: 1
-            },
-            WindowCWD {
-                id: 2,
-                i_tab: 2
-            },
-            WindowCWD {
-                id: 3,
-                i_tab: 3
-            },
+            WindowCWD { id: 0, i_tab: 0 },
+            WindowCWD { id: 1, i_tab: 1 },
+            WindowCWD { id: 2, i_tab: 2 },
+            WindowCWD { id: 3, i_tab: 3 },
         ];
         assert_eq!(
             kitty_get_id_closest_window_with_cwd(i_current_window, &windows).unwrap(),
@@ -380,22 +362,10 @@ mod test_get_id_closest_window_with_cwd {
     fn test4() {
         let i_current_window = 1;
         let windows = vec![
-            WindowCWD {
-                id: 0,
-                i_tab: 0,
-            },
-            WindowCWD {
-                id: 1,
-                i_tab: 1,
-            },
-            WindowCWD {
-                id: 2,
-                i_tab: 2,
-            },
-            WindowCWD {
-                id: 3,
-                i_tab: 3,
-            },
+            WindowCWD { id: 0, i_tab: 0 },
+            WindowCWD { id: 1, i_tab: 1 },
+            WindowCWD { id: 2, i_tab: 2 },
+            WindowCWD { id: 3, i_tab: 3 },
         ];
         assert_eq!(
             kitty_get_id_closest_window_with_cwd(i_current_window, &windows).unwrap(),
@@ -407,26 +377,11 @@ mod test_get_id_closest_window_with_cwd {
     fn test5() {
         let i_current_window = 2;
         let windows = vec![
-            WindowCWD {
-                id: 0,
-                i_tab: 0,
-            },
-            WindowCWD {
-                id: 1,
-                i_tab: 1,
-            },
-            WindowCWD {
-                id: 2,
-                i_tab: 2,
-            },
-            WindowCWD {
-                id: 3,
-                i_tab: 3,
-            },
-            WindowCWD {
-                id: 4,
-                i_tab: 4,
-            },
+            WindowCWD { id: 0, i_tab: 0 },
+            WindowCWD { id: 1, i_tab: 1 },
+            WindowCWD { id: 2, i_tab: 2 },
+            WindowCWD { id: 3, i_tab: 3 },
+            WindowCWD { id: 4, i_tab: 4 },
         ];
         assert_eq!(
             kitty_get_id_closest_window_with_cwd(i_current_window, &windows).unwrap(),
@@ -496,7 +451,7 @@ fn main() {
     {
         // task 1: ensure file exists/verify integrity
         // task 2: return file path
-        // 
+        //
         // define data dir
         // define move tab backward n times kitten file
         // ensure file exists

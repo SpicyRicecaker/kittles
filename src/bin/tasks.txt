@@ -1,0 +1,2 @@
+89
+kitty @ kitten new_adjacent_tab.py
